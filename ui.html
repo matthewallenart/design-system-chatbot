@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>AI Design System Assistant</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background-color: #ffffff;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px;
+      border-bottom: 1px solid #e5e7eb;
+      background-color: #f9fafb;
+    }
+    
+    .header-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .header-title h1 {
+      font-size: 14px;
+      font-weight: 600;
+      color: #111827;
+    }
+    
+    .icon {
+      width: 20px;
+      height: 20px;
+      fill: #2563eb;
+    }
+    
+    .upload-section {
+      padding: 16px;
+      background-color: #eff6ff;
+      border-bottom: 1px solid #bfdbfe;
+      text-align: center;
+    }
+    
+    .upload-area {
+      padding: 32px 16px;
+    }
+    
+    .upload-icon {
+      width: 48px;
+      height: 48px;
+      fill: #60a5fa;
+      margin: 0 auto 16px;
+    }
+    
+    .upload-title {
+      font-size: 18px;
+      font-weight: 500;
+      color: #111827;
+      margin-bottom: 8px;
+    }
+    
+    .upload-subtitle {
+      font-size: 14px;
+      color: #6b7280;
+      margin-bottom: 16px;
+    }
+    
+    .upload-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      background-color: #2563eb;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+    }
+    
+    .upload-btn:hover {
+      background-color: #1d4ed8;
+    }
+    
+    .upload-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    
+    .pdf-status {
+      padding: 12px 16px;
+      background-color: #dcfce7;
+      border-bottom: 1px solid #bbf7d0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      color: #166534;
+    }
+    
+    .change-pdf {
+      margin-left: auto;
+      color: #059669;
+      text-decoration: underline;
+      cursor: pointer;
+      font-size: 12px;
+    }
+    
+    .messages-container {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    
+    .welcome-message {
+      text-align: center;
+      padding: 32px 16px;
+      color: #6b7280;
+    }
+    
+    .welcome-icon {
+      width: 48px;
+      height: 48px;
+      fill: #d1d5db;
+      margin: 0 auto 16px;
+    }
+    
+    .welcome-title {
+      font-size: 18px;
+      font-weight: 500;
+      margin-bottom: 8px;
+    }
+    
+    .suggestions {
+      margin-top: 16px;
+    }
+    
+    .suggestions-label {
+      font-size: 12px;
+      color: #9ca3af;
+      margin-bottom: 8px;
+    }
+    
+    .suggestion-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: center;
+    }
+    
+    .suggestion-btn {
+      padding: 4px 12px;
+      background-color: #f3f4f6;
+      color: #6b7280;
+      border: none;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 12px;
+    }
+    
+    .suggestion-btn:hover {
+      background-color: #e5e7eb;
+    }
+    
+    .message {
+      display: flex;
+      margin-bottom: 16px;
+    }
+    
+    .message.user {
+      justify-content: flex-end;
+    }
+    
+    .message.ai {
+      justify-content: flex-start;
+    }
+    
+    .message.system {
+      justify-content: flex-start;
+    }
+    
+    .message-bubble {
+      max-width: 80%;
+      padding: 12px 16px;
+      border-radius: 12px;
+      font-size: 14px;
+      line-height: 1.4;
+      white-space: pre-wrap;
+    }
+    
+    .message.user .message-bubble {
+      background-color: #2563eb;
+      color: white;
+    }
+    
+    .message.ai .message-bubble {
+      background-color: #f3f4f6;
+      color: #111827;
+    }
+    
+    .message.system .message-bubble {
+      background-color: #fef3c7;
+      color: #92400e;
+      border: 1px solid #fde68a;
+    }
+    
+    .loading-message {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 16px;
+      background-color: #f3f4f6;
+      border-radius: 12px;
+      font-size: 14px;
+      color: #6b7280;
+    }
+    
+    .spinner {
+      width: 16px;
+      height: 16px;
+      border: 2px solid #d1d5db;
+      border-top: 2px solid #6b7280;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    .input-section {
+      padding: 16px;
+      border-top: 1px solid #e5e7eb;
+      background-color: white;
+    }
+    
+    .input-container {
+      display: flex;
+      gap: 8px;
+    }
+    
+    .message-input {
+      flex: 1;
+      padding: 8px 12px;
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+      font-size: 14px;
+      resize: none;
+      outline: none;
+    }
+    
+    .message-input:focus {
+      border-color: #2563eb;
+      box-shadow: 0 0 0 1px #2563eb;
+    }
+    
+    .send-btn {
+      padding: 8px 16px;
+      background-color: #2563eb;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .send-btn:hover {
+      background-color: #1d4ed8;
+    }
+    
+    .send-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    
+    .input-help {
+      font-size: 12px;
+      color: #6b7280;
+      margin-top: 8px;
+    }
+    
+    .hidden {
+      display: none !important;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="header-title">
+      <svg class="icon" viewBox="0 0 24 24">
+        <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
+      </svg>
+      <h1>Design System Assistant (Free AI)</h1>
+    </div>
+  </div>
+
+  <div id="upload-section" class="upload-section">
+    <div class="upload-area">
+      <svg class="upload-icon" viewBox="0 0 24 24">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+        <polyline points="7,10 12,15 17,10"/>
+        <line x1="12" y1="15" x2="12" y2="3"/>
+      </svg>
+      <h3 class="upload-title">Upload Design System PDF</h3>
+      <p class="upload-subtitle">Upload your design system documentation to start asking questions</p>
+      <button id="upload-btn" class="upload-btn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+          <polyline points="14,2 14,8 20,8"/>
+          <line x1="16" y1="13" x2="8" y2="13"/>
+          <line x1="16" y1="17" x2="8" y2="17"/>
+          <polyline points="10,9 9,9 8,9"/>
+        </svg>
+        Choose PDF File
+      </button>
+      <input type="file" id="file-input" accept=".pdf">
+    </div>
+  </div>
+
+  <!-- Test Section -->
+  <div style="padding: 20px; background: #f0f0f0; border: 1px solid #ccc;">
+    <h3>Debug Test</h3>
+    <button onclick="alert('Direct click works!')">Test Button</button>
+    <button onclick="document.getElementById('file-input-test').click()">Test File Upload</button>
+    <input type="file" id="file-input-test" accept=".pdf" onchange="alert('File selected: ' + this.files[0]?.name)">
+  </div>
+    </div>
+  </div>
+
+  <div id="pdf-status" class="pdf-status hidden">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+      <polyline points="14,2 14,8 20,8"/>
+    </svg>
+    <span id="pdf-name">Document loaded</span>
+    <span class="change-pdf" id="change-pdf">Change PDF</span>
+  </div>
+
+  <div id="messages-container" class="messages-container">
+    <div id="welcome-message" class="welcome-message hidden">
+      <svg class="welcome-icon" viewBox="0 0 24 24">
+        <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
+      </svg>
+      <h3 class="welcome-title">Ready to help!</h3>
+      <p>Ask me anything about your design system documentation</p>
+      <div class="suggestions">
+        <div class="suggestions-label">Try asking:</div>
+        <div class="suggestion-buttons">
+          <button class="suggestion-btn" data-suggestion="What are the color guidelines?">What are the color guidelines?</button>
+          <button class="suggestion-btn" data-suggestion="How should I use buttons?">How should I use buttons?</button>
+          <button class="suggestion-btn" data-suggestion="What's the typography scale?">What's the typography scale?</button>
+          <button class="suggestion-btn" data-suggestion="Spacing recommendations?">Spacing recommendations?</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="input-section" class="input-section hidden">
+    <div class="input-container">
+      <textarea 
+        id="message-input" 
+        class="message-input" 
+        placeholder="Ask about your design system..."
+        rows="1"
+      ></textarea>
+      <button id="send-btn" class="send-btn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+          <line x1="22" y1="2" x2="11" y2="13"/>
+          <polygon points="22,2 15,22 11,13 2,9 22,2"/>
+        </svg>
+      </button>
+    </div>
+    <div class="input-help">Press Enter to send • Shift+Enter for new line</div>
+  </div>
+
+  <script>
+    let pdfContent = '';
+    let pdfName = '';
+    let isLoading = false;
+    let messages = [];
+
+    const uploadSection = document.getElementById('upload-section');
+    const pdfStatus = document.getElementById('pdf-status');
+    const pdfNameSpan = document.getElementById('pdf-name');
+    const messagesContainer = document.getElementById('messages-container');
+    const welcomeMessage = document.getElementById('welcome-message');
+    const inputSection = document.getElementById('input-section');
+    const messageInput = document.getElementById('message-input');
+    const sendBtn = document.getElementById('send-btn');
+    const uploadBtn = document.getElementById('upload-btn');
+    const fileInput = document.getElementById('file-input');
+    const changePdfBtn = document.getElementById('change-pdf');
+
+    function init() {
+      console.log('AI Design System Assistant initialized');
+      
+      // Test basic functionality
+      console.log('Upload button exists:', !!document.getElementById('upload-btn'));
+      console.log('File input exists:', !!document.getElementById('file-input'));
+      
+      // Simple direct assignment
+      const btn = document.getElementById('upload-btn');
+      const input = document.getElementById('file-input');
+      
+      if (btn && input) {
+        btn.onclick = function() {
+          console.log('Button clicked - opening file dialog');
+          input.click();
+        };
+        console.log('Button click handler assigned');
+      } else {
+        console.error('Elements not found:', { btn: !!btn, input: !!input });
+      }
+      
+      if (input) {
+        input.onchange = function(e) {
+          console.log('File selected:', e.target.files[0]?.name);
+          handleFileUpload(e);
+        };
+      }
+      
+      // Other event listeners
+      const changePdf = document.getElementById('change-pdf');
+      const sendButton = document.getElementById('send-btn');
+      const messageBox = document.getElementById('message-input');
+      
+      if (changePdf) {
+        changePdf.onclick = resetPdf;
+      }
+      
+      if (sendButton) {
+        sendButton.onclick = sendMessage;
+      }
+      
+      if (messageBox) {
+        messageBox.onkeydown = handleKeyPress;
+        messageBox.oninput = autoResizeTextarea;
+      }
+      
+      // Suggestion buttons
+      document.onclick = function(e) {
+        if (e.target.classList.contains('suggestion-btn')) {
+          const messageInput = document.getElementById('message-input');
+          if (messageInput) {
+            messageInput.value = e.target.dataset.suggestion;
+            messageInput.focus();
+          }
+        }
+      };
+    }
+
+    async function handleFileUpload(event) {
+      const file = event.target.files[0];
+      if (!file || file.type !== 'application/pdf') {
+        alert('Please upload a PDF file');
+        return;
+      }
+
+      uploadBtn.innerHTML = '<div class="spinner"></div> Processing...';
+      uploadBtn.disabled = true;
+
+      try {
+        // Convert PDF to base64 for API
+        const base64Data = await new Promise(function(resolve, reject) {
+          const reader = new FileReader();
+          reader.onload = function() {
+            const base64 = reader.result.split(",")[1];
+            resolve(base64);
+          };
+          reader.onerror = function() {
+            reject(new Error("Failed to read file"));
+          };
+          reader.readAsDataURL(file);
+        });
+
+        pdfContent = base64Data;
+        pdfName = file.name;
+        
+        console.log('PDF processed, base64 length:', base64Data.length);
+        
+        uploadSection.classList.add('hidden');
+        pdfStatus.classList.remove('hidden');
+        pdfNameSpan.textContent = '📄 ' + file.name + ' loaded';
+        welcomeMessage.classList.remove('hidden');
+        inputSection.classList.remove('hidden');
+        
+        addMessage('system', '✅ PDF "' + file.name + '" uploaded successfully! I can now answer questions about your design system based on the document content.');
+        
+      } catch (error) {
+        console.error('Error processing PDF:', error);
+        addMessage('system', '❌ Error processing PDF. Please try again.');
+        uploadBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/></svg> Choose PDF File';
+        uploadBtn.disabled = false;
+      }
+    }
+
+    function resetPdf() {
+      pdfText = '';
+      pdfName = '';
+      messages = [];
+      
+      uploadSection.classList.remove('hidden');
+      pdfStatus.classList.add('hidden');
+      welcomeMessage.classList.add('hidden');
+      inputSection.classList.add('hidden');
+      
+      messagesContainer.innerHTML = '';
+      messageInput.value = '';
+      fileInput.value = '';
+      
+      uploadBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/></svg> Choose PDF File';
+      uploadBtn.disabled = false;
+    }
+
+    async function sendMessage() {
+      const message = messageInput.value.trim();
+      if (!message || !pdfText || isLoading) return;
+
+      addMessage('user', message);
+      messageInput.value = '';
+      autoResizeTextarea();
+      
+      showLoading();
+      isLoading = true;
+      sendBtn.disabled = true;
+
+      try {
+        console.log('Sending request to Groq API (free)...');
+        console.log('Message:', message);
+        console.log('PDF text length:', pdfText.length);
+
+        // Truncate text if too long (keep most relevant parts)
+        let relevantText = pdfText;
+        if (pdfText.length > 12000) {
+          // Try to find sections relevant to the question
+          const questionLower = message.toLowerCase();
+          const textLower = pdfText.toLowerCase();
+          
+          let bestMatch = '';
+          const keywords = ['color', 'typography', 'font', 'button', 'spacing', 'margin', 'padding', 'grid'];
+          
+          for (const keyword of keywords) {
+            if (questionLower.includes(keyword)) {
+              const index = textLower.indexOf(keyword);
+              if (index !== -1) {
+                // Extract around the keyword
+                const start = Math.max(0, index - 2000);
+                const end = Math.min(pdfText.length, index + 4000);
+                bestMatch = pdfText.substring(start, end);
+                break;
+              }
+            }
+          }
+          
+          if (bestMatch) {
+            relevantText = bestMatch;
+          } else {
+            // Just take first 12000 chars
+            relevantText = pdfText.substring(0, 12000);
+          }
+        }
+
+        const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer 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"
+          },
+          body: JSON.stringify({
+            model: "llama-3.3-70b-versatile",
+            messages: [
+              {
+                role: "user",
+                content: "You are an AI assistant helping designers understand their design system. I've extracted the actual text content from a design system PDF. Please answer this question based on the content: " + message + "\n\nDesign System Content:\n" + relevantText + "\n\nGuidelines for your response:\n- Be specific and reference exact information from the content\n- Quote relevant sections when helpful\n- Use design terminology appropriately\n- If the answer isn't clearly in the content, say so and suggest where to look\n- Format your response to be easy to scan with clear headings\n- Focus on practical, actionable guidance for designers"
+              }
+            ],
+            max_tokens: 1000,
+            temperature: 0.1
+          })
+        });
+
+        console.log('Response status:', response.status);
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error('API Error Response:', errorText);
+          throw new Error('API request failed: ' + response.status + ' - ' + errorText);
+        }
+
+        const data = await response.json();
+        console.log('API Response received successfully');
+        hideLoading();
+        
+        if (data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content) {
+          addMessage('ai', data.choices[0].message.content);
+        } else {
+          throw new Error('Invalid response format from API');
+        }
+        
+      } catch (error) {
+        console.error('Error details:', error);
+        hideLoading();
+        
+        let errorMessage = '❌ Sorry, I encountered an error: ';
+        if (error.message.includes('Failed to fetch')) {
+          errorMessage += 'Network connection failed. Make sure your manifest.json includes networkAccess for https://api.groq.com';
+        } else if (error.message.includes('429')) {
+          errorMessage += 'Rate limit exceeded. Please wait a moment and try again.';
+        } else if (error.message.includes('401')) {
+          errorMessage += 'Invalid API key. Please check your Groq API key.';
+        } else if (error.message.includes('API request failed')) {
+          errorMessage += error.message.split(' - ')[1] || error.message;
+        } else {
+          errorMessage += error.message;
+        }
+        
+        addMessage('ai', errorMessage);
+        
+      } finally {
+        isLoading = false;
+        sendBtn.disabled = false;
+      }
+    }
+
+    function addMessage(type, content) {
+      messages.push({ type: type, content: content });
+      
+      const messageDiv = document.createElement('div');
+      messageDiv.className = 'message ' + type;
+      
+      const bubbleDiv = document.createElement('div');
+      bubbleDiv.className = 'message-bubble';
+      bubbleDiv.textContent = content;
+      
+      messageDiv.appendChild(bubbleDiv);
+      messagesContainer.appendChild(messageDiv);
+      
+      welcomeMessage.classList.add('hidden');
+      messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+
+    function showLoading() {
+      const loadingDiv = document.createElement('div');
+      loadingDiv.id = 'loading-indicator';
+      loadingDiv.className = 'message ai';
+      loadingDiv.innerHTML = '<div class="loading-message"><div class="spinner"></div><span>Thinking...</span></div>';
+      messagesContainer.appendChild(loadingDiv);
+      messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+
+    function hideLoading() {
+      const loadingDiv = document.getElementById('loading-indicator');
+      if (loadingDiv) {
+        loadingDiv.remove();
+      }
+    }
+
+    function handleKeyPress(event) {
+      if (event.key === 'Enter' && !event.shiftKey) {
+        event.preventDefault();
+        sendMessage();
+      }
+    }
+
+    function autoResizeTextarea() {
+      messageInput.style.height = 'auto';
+      messageInput.style.height = Math.min(messageInput.scrollHeight, 100) + 'px';
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', init);
+    } else {
+      init();
+    }
+  </script>
+</body>
+</html>
